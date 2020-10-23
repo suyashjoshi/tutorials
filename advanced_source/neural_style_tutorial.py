@@ -5,7 +5,7 @@ Neural Transfer Using PyTorch
 
 **Author**: `Alexis Jacq <https://alexis-jacq.github.io>`_
  
-**Edited by**: `Winston Herring <https://github.com/winston6>`_
+**Edited by**: `Winston Herring <https://github.com/winston6>, Suyash Joshi <https://github.com/suyashjoshi>`_
 
 Introduction
 ------------
@@ -54,6 +54,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
+import requests
+from io import BytesIO
+
 from PIL import Image
 import matplotlib.pyplot as plt
 
@@ -77,7 +80,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Loading the Images
 # ------------------
 #
-# Now we will import the style and content images. The original PIL images have values between 0 and 255, but when
+# Now we will import the following images:
+# Style Image: `picasso.jpg <https://pytorch.org/tutorials/_static/img/neural-style/picasso.jpg>`
+# Content Image`dancing.jpg <https://pytorch.org/tutorials/_static/img/neural-style/dancing.jpg>`.
+# The original PIL images have values between 0 and 255, but when
 # transformed into torch tensors, their values are converted to be between
 # 0 and 1. The images also need to be resized to have the same dimensions.
 # An important detail to note is that neural networks from the
@@ -89,9 +95,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #
 #
 # .. Note::
-#     Here are links to download the images required to run the tutorial:
-#     `picasso.jpg <https://pytorch.org/tutorials/_static/img/neural-style/picasso.jpg>`__ and
-#     `dancing.jpg <https://pytorch.org/tutorials/_static/img/neural-style/dancing.jpg>`__.
+#     Here are links to the images required to run the tutorial:
+#     
 #     Download these two images and add them to a directory
 #     with name ``images`` in your current working directory.
 
@@ -102,9 +107,9 @@ loader = transforms.Compose([
     transforms.Resize(imsize),  # scale imported image
     transforms.ToTensor()])  # transform it into a torch tensor
 
-
-def image_loader(image_name):
-    image = Image.open(image_name)
+def image_loader(image_url):
+    response = requests.get(image_url)
+    image = Image.open(BytesIO(response.content))
     # fake batch dimension required to fit network's input dimensions
     image = loader(image).unsqueeze(0)
     return image.to(device, torch.float)
